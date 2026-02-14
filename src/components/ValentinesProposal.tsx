@@ -166,43 +166,50 @@ export default function ValentinesProposal() {
             </div>
           </motion.div>
         )}
+      
         {step === 3 && (
-        <motion.div
-        key="step-3"
-        className={`flex flex-col justify-center items-center text-center px-4 ${playfairDisplay.className}`}
-        transition={{ duration: 1 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
-        <h2 className="text-4xl md:text-5xl font-semibold mb-6">
-          HEHEHE, I love you Ishudi! Happy Valentines Day!!!!! 💕..gey
-        </h2>
+  <motion.div
+    key="step-3"
+    className={`flex flex-col justify-center items-center text-center px-4 ${playfairDisplay.className}`}
+    transition={{ duration: 1 }}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+  >
+    <h2 className="text-4xl lg:text-6xl font-semibold mb-6">
+      HEHEHE, I love you Ishudi! Happy Valentines Day!!!!! 💕
+    </h2>
 
-        {/* 🎥 Centered Video */}
-        <div className="w-[98vw] max-w-3xl aspect-video mb-6">
-          <video
-            className="w-full h-full rounded-2xl shadow-2xl"
-            controls
-            autoPlay
-            playsInline
-            preload="metadata"
-          >
-            <source src="/V_day_video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-
-        {/* 🐹 Hamster GIF */}
-        <Image
-          src="/hamster_jumping.gif"
-          alt="Hamster Feliz"
-          width={200}
-          height={200}
-          unoptimized
+    {/* YouTube Unlisted Embed (with sound when user taps if autoplay is blocked) */}
+    <div className="w-full max-w-6xl">
+      <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+        <iframe
+          className="absolute inset-0 w-full h-full"
+          src="https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&mute=0&playsinline=1&rel=0"
+          title="V Day Video"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
         />
-      </motion.div>
-    )}
+      </div>
+      <p className="text-sm opacity-70 mt-3">
+        If sound doesn’t start automatically, click the video once 🙂
+      </p>
+    </div>
+
+    <div className="mt-8">
+      <Image
+        src="/hamster_jumping.gif"
+        alt="Hamster Feliz"
+        width={200}
+        height={200}
+        unoptimized
+      />
+    </div>
+  </motion.div>
+)}
+
+        
+        
 
       </AnimatePresence>
 
