@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Playfair_Display } from "next/font/google";
 import { motion, AnimatePresence } from "framer-motion";
 import Fireworks from "@fireworks-js/react";
@@ -49,15 +49,9 @@ const images = [
   "/game-photos/36.avif",
 ];
 
-// ✅ Your Google Drive file id
-const DRIVE_FILE_ID = "1wEIYVtOKzzg8PlySjUkSJD33g3M3lVBd";
-
-// Google Drive “direct-ish” stream URL
-function driveVideoSrc(fileId: string) {
-  // This works for many public/shared Drive files in <video>.
-  // If Drive ever blocks streaming, easiest fix is: YouTube (unlisted) or Cloudinary.
-  return `https://drive.google.com/uc?export=download&id=${fileId}`;
-}
+// ✅ Streamable embed (your link: https://streamable.com/saw3yb)
+const STREAMABLE_EMBED_URL =
+  "https://streamable.com/e/saw3yb?autoplay=1&muted=1&loop=0";
 
 export default function ValentinesProposal() {
   const [step, setStep] = useState(0);
@@ -66,11 +60,8 @@ export default function ValentinesProposal() {
   );
   const [showFireworks, setShowFireworks] = useState(false);
 
-  // video controls
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [needsUserSoundClick, setNeedsUserSoundClick] = useState(true);
-
-  const videoUrl = useMemo(() => driveVideoSrc(DRIVE_FILE_ID), []);
+  // for the "tap for sound" overlay
+  const [hideSoundHint, setHideSoundHint] = useState(false);
 
   const getRandomPosition = () => {
     const randomTop = Math.random() * 80;
@@ -93,47 +84,8 @@ export default function ValentinesProposal() {
     setStep(3);
   };
 
-  // When step becomes 3: try autoplay muted
-  useEffect(() => {
-    if (step !== 3) return;
-
-    setNeedsUserSoundClick(true);
-
-    const v = videoRef.current;
-    if (!v) return;
-
-    v.muted = true; // required for autoplay
-    v.playsInline = true;
-
-    const tryPlay = async () => {
-      try {
-        await v.play();
-        // playing muted is fine; user click later for sound
-      } catch {
-        // If autoplay fails, user will click play anyway
-      }
-    };
-
-    tryPlay();
-  }, [step]);
-
-  const enableSoundAndPlay = async () => {
-    const v = videoRef.current;
-    if (!v) return;
-
-    try {
-      v.muted = false;
-      v.volume = 1;
-      await v.play();
-      setNeedsUserSoundClick(false);
-    } catch {
-      // If play still blocked, user can press native controls play
-      setNeedsUserSoundClick(true);
-    }
-  };
-
   return (
-    <div className="flex flex-col items-center justify-center h-full">
+    <div className="flex flex-col items-center justify-center h-full relative">
       <AnimatePresence mode="wait">
         {step === 0 && (
           <motion.h2
@@ -209,7 +161,11 @@ export default function ValentinesProposal() {
                 className="px-6 py-2 text-lg font-semibold text-white bg-gradient-to-r from-gray-500 to-gray-600 rounded-xl hover:from-gray-600 hover:to-gray-700 transform hover:scale-95 transition-all duration-300 shadow-lg"
                 style={
                   position
-                    ? { position: "absolute", top: position.top, left: position.left }
+                    ? {
+                        position: "absolute",
+                        top: position.top,
+                        left: position.left,
+                      }
                     : {}
                 }
                 onMouseEnter={() => setPosition(getRandomPosition())}
@@ -221,7 +177,7 @@ export default function ValentinesProposal() {
           </motion.div>
         )}
 
-        {/* ✅ STEP 3 with BIG Drive video + sound button */}
+        {/* ✅ STEP 3: Big centered Streamable video + sound hint */}
         {step === 3 && (
           <motion.div
             key="step-3"
@@ -231,46 +187,38 @@ export default function ValentinesProposal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <h2 className="text-5xl font-semibold mb-6">
+            <h2 className="text-5xl md:text-6xl font-semibold mb-6">
               HEHEHE, I love you Ishudi! Happy Valentines Day!!!!! 💕..gey
             </h2>
 
-            {/* Big centered video */}
-            <div className="w-full flex justify-center">
-              <div className="relative w-[92vw] max-w-5xl">
-                <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black/40">
-                  <video
-                    ref={videoRef}
-                    src={videoUrl}
-                    className="w-full h-auto max-h-[70vh] object-contain"
-                    controls
-                    playsInline
-                    preload="metadata"
-                    onPlay={() => {
-                      // if user pressed play, they likely want sound too
-                    }}
-                  />
-                </div>
+            {/* Video wrapper (bigger, centered) */}
+            <div className="w-[min(92vw,1100px)]">
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black/40">
+                <iframe
+                  title="V-Day Video"
+                  src={STREAMABLE_EMBED_URL}
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
 
-                {/* Tap for sound overlay (only shows until user clicks) */}
-                {needsUserSoundClick && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <button
-                      className="pointer-events-auto px-6 py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-xl"
-                      onClick={enableSoundAndPlay}
-                    >
-                      Tap for sound 🔊
-                    </button>
-                  </div>
+                {!hideSoundHint && (
+                  <button
+                    onClick={() => setHideSoundHint(true)}
+                    className="absolute top-4 left-1/2 -translate-x-1/2 px-5 py-2 rounded-xl text-white font-semibold bg-gradient-to-r from-pink-500 to-rose-500 shadow-lg hover:scale-105 transition"
+                  >
+                    Tap for sound 🔊
+                  </button>
                 )}
               </div>
+
+              <p className="mt-4 text-sm text-white/70">
+                If sound doesn&apos;t start automatically, click inside the video
+                (or tap “Tap for sound”) once 🙂
+              </p>
             </div>
 
-            <p className="mt-4 text-sm opacity-70">
-              If sound doesn&apos;t start automatically, click the “Tap for sound” button once 🙂
-            </p>
-
-            <div className="mt-6">
+            <div className="mt-8">
               <Image
                 src="/hamster_jumping.gif"
                 alt="Hamster Feliz"
@@ -284,7 +232,7 @@ export default function ValentinesProposal() {
       </AnimatePresence>
 
       {showFireworks && (
-        <div className="absolute w-full h-full">
+        <div className="absolute w-full h-full pointer-events-none">
           <Fireworks
             options={{ autoresize: true }}
             style={{
