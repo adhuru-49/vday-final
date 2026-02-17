@@ -96,7 +96,7 @@ export default function ValentinesProposal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            Congratulations! makkha (not so makkha due to GT).
+            Congratulations!  (due to GT).
           </motion.h2>
         )}
 
@@ -109,7 +109,7 @@ export default function ValentinesProposal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            Are you Makkha?
+            Happy?
           </motion.h2>
         )}
 
